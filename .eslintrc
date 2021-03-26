@@ -7,10 +7,11 @@
 	},
 	"extends": [
 		"airbnb-base",
-    	"eslint:recommended",
-    	"plugin:@typescript-eslint/recommended",
-    	"prettier",
-    	"prettier/@typescript-eslint",
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended",
+		"prettier",
+		"prettier/@typescript-eslint",
+		"plugin:tailwind/recommended"
    ],
 	"parser": "@typescript-eslint/parser",
 	"parserOptions": {
