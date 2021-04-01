@@ -14,7 +14,7 @@ export const SequenceTimetick: FC<SequenceTimetickProps> = memo(({ timeScale, du
   return (
     <div className="relative border-b-2 border-gray-400" style={{ width: durationTime / timeScale }}>
       {timeTicks.map((tick) => (
-        <Timetick tick={tick} timeScale={timeScale} />
+        <Timetick key={tick} tick={tick} timeScale={timeScale} />
       ))}
     </div>
   );

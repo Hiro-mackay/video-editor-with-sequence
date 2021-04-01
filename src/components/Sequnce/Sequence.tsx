@@ -4,6 +4,8 @@ import { Timeline } from './Timeline';
 
 interface IMTE {
   id: string;
+  text: string;
+  length: number; // ミリ秒
 }
 
 export interface SequenceProps {
@@ -12,25 +14,19 @@ export interface SequenceProps {
   changeItemHandler: (state: any) => void;
 }
 
-export const Sequence: FC<SequenceProps> = memo(({ items, sequenceScale }) => {
-  const [timelines, setTimelines] = useState<Array<IMTE>>(items);
-
-  useEffect(() => {
-    console.log(items);
-  }, [timelines]);
-
+export const Sequence: FC<SequenceProps> = memo(({ items, changeItemHandler, sequenceScale }) => {
   return (
     <ReactSortable
       className="flex flex-nowrap w-min"
-      list={timelines}
-      setList={setTimelines}
+      list={items}
+      setList={changeItemHandler}
       swapThreshold={0.8}
-      ghostClass="bg-green-400"
+      ghostClass="bg-green-300"
       animation={300}
       delay={1}
     >
       {items.map((item) => (
-        <Timeline length={200} sequenceScale={sequenceScale} />
+        <Timeline key={item.id} length={item.length} sequenceScale={sequenceScale} />
       ))}
     </ReactSortable>
   );
