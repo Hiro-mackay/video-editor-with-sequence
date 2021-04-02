@@ -1,4 +1,5 @@
 import React, { FC, memo } from 'react';
+import { useSequenceContext } from '../../contexts/Sequence';
 
 interface SequenceTimetickProps {
   timeScale: number;
@@ -10,11 +11,12 @@ interface TimetickProps {
   tick: number;
 }
 
-export const SequenceTimetick: FC<SequenceTimetickProps> = memo(({ timeScale, durationTime, timeTicks }) => {
+export const SequenceTimetick: FC = memo(() => {
+  const { timeDuration, sequenceScale, timeTicks } = useSequenceContext();
   return (
-    <div className="relative border-b-2 border-gray-400" style={{ width: durationTime / timeScale }}>
+    <div className="relative border-b-2 border-gray-400" style={{ width: timeDuration / sequenceScale }}>
       {timeTicks.map((tick) => (
-        <Timetick key={tick} tick={tick} timeScale={timeScale} />
+        <Timetick key={tick} tick={tick} timeScale={sequenceScale} />
       ))}
     </div>
   );

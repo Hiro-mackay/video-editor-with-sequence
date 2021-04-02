@@ -1,5 +1,8 @@
 import React, { FC, memo, useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
+import { useCanvasContext } from '../../contexts/canvas';
+import { useSequenceContext } from '../../contexts/Sequence';
+import { useCanvas } from '../../hooks/Pixi';
 import { Timeline } from './Timeline';
 
 interface IMTE {
@@ -8,25 +11,23 @@ interface IMTE {
   length: number; // ミリ秒
 }
 
-export interface SequenceProps {
-  items: Array<IMTE>;
-  sequenceScale: number;
-  changeItemHandler: (state: any) => void;
-}
+export const Sequence: FC = memo(() => {
+  const { setResources } = useCanvasContext();
+  const { Canvas } = useCanvas();
+  const { sequenceScale } = useSequenceContext();
 
-export const Sequence: FC<SequenceProps> = memo(({ items, changeItemHandler, sequenceScale }) => {
   return (
     <ReactSortable
       className="flex flex-nowrap w-min"
-      list={items}
-      setList={changeItemHandler}
+      list={Canvas.resources}
+      setList={setResources}
       swapThreshold={0.8}
       ghostClass="bg-green-300"
       animation={300}
       delay={1}
     >
-      {items.map((item) => (
-        <Timeline key={item.id} length={item.length} sequenceScale={sequenceScale} />
+      {Canvas.resources.map((item) => (
+        <Timeline key={item.id} length={item.end} sequenceScale={sequenceScale} />
       ))}
     </ReactSortable>
   );
