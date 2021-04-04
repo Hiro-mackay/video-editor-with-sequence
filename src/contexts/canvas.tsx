@@ -1,28 +1,22 @@
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useEffect } from 'react';
 import { Dispatch, useState, FC, memo, SetStateAction } from 'react';
 import * as PIXI from 'pixi.js';
-
-export interface IVideoResource {
-  id: number;
-  texture: PIXI.Texture;
-  start: number;
-  end: number;
-  deltaStart: number;
-}
-
-export interface CurrentSource {
-  sprite: PIXI.Sprite;
-  video: HTMLVideoElement;
-}
-
-export interface NextSource {
-  sprite: PIXI.Sprite;
-}
-
-export interface Player {
-  isPlayed: boolean;
-  isPaused: boolean;
-}
+import {
+  getResources,
+  getViewTime,
+  loadCurrentSource,
+  loadNextSource,
+  render,
+  Resources,
+  setResources as setPIXIResources,
+  Source,
+  loop as PIXIloop,
+  pause,
+  play,
+  getCurrentTime,
+  paused,
+  stop
+} from '../hooks/Pixi';
 
 export function createCtx<T extends {} | null>() {
   const ctx = createContext<T | undefined>(undefined);
@@ -41,9 +35,9 @@ export interface IEntity {
   currentTime: number;
   viewingTime: number;
   deltaTime: number;
-  resources: IVideoResource[];
-  source: CurrentSource;
-  nextSource: NextSource;
+  resources: Resources;
+  source: Source;
+  nextSource: Source;
 }
 
 export interface IContext {
@@ -51,17 +45,21 @@ export interface IContext {
   currentTime: number;
   viewingTime: number;
   deltaTime: number;
-  resources: IVideoResource[];
-  source: CurrentSource;
-  nextSource: NextSource;
+  resources: Resources;
+  source: Source;
+  nextSource: Source;
 
   setApp: Dispatch<SetStateAction<PIXI.Application>>;
   setCurrentTime: Dispatch<SetStateAction<number>>;
   setViewingTime: Dispatch<SetStateAction<number>>;
   setDeltaTime: Dispatch<SetStateAction<number>>;
-  setResources: Dispatch<SetStateAction<IVideoResource[]>>;
-  setSource: Dispatch<SetStateAction<CurrentSource>>;
-  setNextSource: Dispatch<SetStateAction<NextSource>>;
+  setResources: Dispatch<SetStateAction<Resources>>;
+  setSource: Dispatch<SetStateAction<Source>>;
+  setNextSource: Dispatch<SetStateAction<Source>>;
+
+  deltaPlay: () => void;
+  deltaPause: () => void;
+  deltaStop: () => void;
 }
 
 export const [useCanvasContext, CanvasContext] = createCtx<IContext>();
@@ -71,13 +69,56 @@ export const CanvasProvider: FC = memo(({ children }) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [viewingTime, setViewingTime] = useState(0);
   const [deltaTime, setDeltaTime] = useState(0);
-  const [resources, setResources] = useState<IVideoResource[]>([]);
-  const [source, setSource] = useState<CurrentSource>({
+  const [resources, setResources] = useState<Resources>([]);
+  const [source, setSource] = useState<Source>({
     sprite: null,
     video: null
   });
-  
-  const [nextSource, setNextSource] = useState<NextSource>({ sprite: null });
+
+  const [nextSource, setNextSource] = useState<Source>({ sprite: null, video: null });
+
+  const loop = () => {
+    const time = getCurrentTime();
+    setCurrentTime(time);
+  };
+
+  const deltaLoop = PIXIloop(loop);
+
+  const renderer = () => {
+    if (paused) return;
+
+    deltaLoop();
+    requestAnimationFrame(renderer);
+  };
+
+  const deltaPlay = () => {
+    play();
+    renderer();
+  };
+
+  const deltaPause = () => {
+    pause();
+  };
+
+  const deltaStop = () => {
+    console.log('RESET');
+    stop();
+    setCurrentTime(0);
+  };
+
+  useEffect(() => {
+    setPIXIResources(resources);
+
+    const source = loadCurrentSource(currentTime);
+    // const next = loadNextSource(currentTime);
+
+    source.video?.pause();
+    // next.video?.pause();
+
+    const viewTime = getViewTime();
+    setViewingTime(viewTime);
+    console.log(resources);
+  }, [resources]);
 
   return (
     <CanvasContext.Provider
@@ -95,7 +136,10 @@ export const CanvasProvider: FC = memo(({ children }) => {
         setDeltaTime,
         setResources,
         setSource,
-        setNextSource
+        setNextSource,
+        deltaPlay,
+        deltaPause,
+        deltaStop
       }}
     >
       {children}

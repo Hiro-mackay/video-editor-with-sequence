@@ -2,32 +2,29 @@ import React, { FC, memo, useEffect, useState } from 'react';
 import { ReactSortable } from 'react-sortablejs';
 import { useCanvasContext } from '../../contexts/canvas';
 import { useSequenceContext } from '../../contexts/Sequence';
-import { useCanvas } from '../../hooks/Pixi';
 import { Timeline } from './Timeline';
-
-interface IMTE {
-  id: string;
-  text: string;
-  length: number; // ミリ秒
-}
+import { reloadResource } from '../../hooks/Pixi';
 
 export const Sequence: FC = memo(() => {
-  const { setResources } = useCanvasContext();
-  const { Canvas } = useCanvas();
+  const { resources, setResources } = useCanvasContext();
+  const {} = useCanvasContext();
   const { sequenceScale } = useSequenceContext();
 
   return (
     <ReactSortable
       className="flex flex-nowrap w-min"
-      list={Canvas.resources}
-      setList={setResources}
+      list={resources}
+      setList={(state) => {
+        const resources = reloadResource(state);
+        setResources(resources);
+      }}
       swapThreshold={0.8}
       ghostClass="bg-green-300"
       animation={300}
       delay={1}
     >
-      {Canvas.resources.map((item) => (
-        <Timeline key={item.id} length={item.end} sequenceScale={sequenceScale} />
+      {resources.map((item) => (
+        <Timeline key={item.id} title={`${item.id}`} length={item.outFrame} sequenceScale={sequenceScale} />
       ))}
     </ReactSortable>
   );

@@ -1,9 +1,10 @@
 import React, { FC, memo, useEffect, useRef } from 'react';
-import { useCanvas } from '../hooks/Pixi';
+import { useCanvasContext } from '../contexts/canvas';
+import { initApp, loadAsset, next } from '../hooks/Pixi';
 
 export const Canvas: FC = memo(() => {
   const ref = useRef<HTMLCanvasElement>();
-  const { initApp, play, puase, loadAsset } = useCanvas();
+  const { currentTime, setResources, deltaPlay, deltaPause, deltaStop } = useCanvasContext();
 
   useEffect(() => {
     initApp(ref.current);
@@ -27,21 +28,29 @@ export const Canvas: FC = memo(() => {
           </canvas>
         </div>
       </div>
+      <p className="text-white pt-4">{currentTime}</p>
       <label className="mt-5 bg-white inline-block">
         動画追加
         <input
           type="file"
           hidden
-          onChange={(e) => {
-            loadAsset(e.currentTarget.files[0]);
+          onChange={async (e) => {
+            const resources = await loadAsset(e.currentTarget.files[0]);
+            setResources(resources);
           }}
         />
       </label>
       <div className="pt-5">
-        <input type="button" value="再生" onClick={play} />
+        <input type="button" value="再生" onClick={deltaPlay} />
       </div>
       <div className="pt-5">
-        <input type="button" value="停止" onClick={puase} />
+        <input type="button" value="停止" onClick={deltaPause} />
+      </div>
+      <div className="pt-5">
+        <input type="button" value="リセット" onClick={deltaStop} />
+      </div>
+      <div className="pt-5">
+        <input type="button" value="次へ" onClick={next} />
       </div>
     </>
   );

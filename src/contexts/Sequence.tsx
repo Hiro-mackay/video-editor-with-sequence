@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect } from 'react';
 import { Dispatch, useState, FC, memo, SetStateAction } from 'react';
 import * as PIXI from 'pixi.js';
+import { useCanvasContext } from './canvas';
 
 const DEFAULT_TIME = 10000;
 
@@ -31,9 +32,10 @@ const createTimeTicks = (time: number) => [...Array(Math.ceil(time / 1000))].map
 export const [useSequenceContext, SequenceContext] = createCtx<IContext>();
 
 export const SequenceProvider: FC = memo(({ children }) => {
+  const { viewingTime, currentTime } = useCanvasContext();
   const [timeDuration, setTimeDuration] = useState(DEFAULT_TIME);
   const [timeTicks, setTimeTicks] = useState(createTimeTicks(timeDuration));
-  const [sequenceScale, setSequenceScale] = useState(5);
+  const [sequenceScale, setSequenceScale] = useState(10);
 
   useEffect(() => {
     if (timeDuration < DEFAULT_TIME) return;
@@ -41,6 +43,12 @@ export const SequenceProvider: FC = memo(({ children }) => {
     const ticks = createTimeTicks(timeDuration);
     setTimeTicks(ticks);
   }, [timeDuration]);
+
+  useEffect(() => {
+    if (viewingTime < DEFAULT_TIME) return;
+
+    setTimeDuration(viewingTime + 1000);
+  }, [viewingTime]);
 
   return (
     <SequenceContext.Provider
