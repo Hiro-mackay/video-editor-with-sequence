@@ -101,7 +101,6 @@ export const CanvasProvider: FC = memo(({ children }) => {
   };
 
   const deltaStop = () => {
-    console.log('RESET');
     stop();
     setCurrentTime(0);
   };
